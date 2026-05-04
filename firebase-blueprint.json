@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "User Profile",
+      "description": "Details about the student's academic background and research interests.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "education": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "interests": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "locationPreferences": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "lastAnalyzedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email"]
+    },
+    "PhDPosition": {
+      "title": "PhD Position",
+      "description": "An available PhD or Research Assistant position.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "university": { "type": "string" },
+        "location": { "type": "string" },
+        "deadline": { "type": "string" },
+        "applyLink": { "type": "string" },
+        "jobDescription": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "matchScore": { "type": "number" },
+        "matchAnalysis": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "extractedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "university", "link"]
+    },
+    "Application": {
+      "title": "Application Tracker",
+      "description": "User's application progress for a specific position.",
+      "type": "object",
+      "properties": {
+        "jobId": { "type": "string" },
+        "status": { "type": "string", "enum": ["interested", "applied", "interviewing", "accepted", "rejected"] },
+        "notes": { "type": "string" },
+        "reminderSent": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CareerTrend": {
+      "title": "Market Trends",
+      "description": "Analysis of job market trends and skill demands in CS.",
+      "type": "object",
+      "properties": {
+        "field": { "type": "string" },
+        "demandLevel": { "type": "string" },
+        "trendingSkills": { "type": "array", "items": { "type": "string" } },
+        "analysis": { "type": "string" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "profiles": {
+      "schema": "Profile",
+      "description": "Collection of user profiles."
+    },
+    "positions": {
+      "schema": "PhDPosition",
+      "description": "Collection of discovered PhD and RA positions."
+    },
+    "applications": {
+      "schema": "Application",
+      "description": "Collection of tracked applications per user."
+    },
+    "trends": {
+      "schema": "CareerTrend",
+      "description": "General CS career trend analysis data."
+    }
+  }
+}

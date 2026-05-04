@@ -1,0 +1,6 @@
+{
+  "name": "EuroPhD AI Agent",
+  "description": "An intelligent PhD and RA position discovery agent for Computer Science students in Europe, featuring profile matching, market trend analysis, and deadline tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["AI Researcher", "Automation", "Career Guidance"]
+}

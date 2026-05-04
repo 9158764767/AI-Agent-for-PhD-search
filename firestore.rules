@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Functions ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+
+    function isValidProfile(data) {
+      return data.keys().hasAll(['name', 'email']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 100;
+    }
+
+    function isValidPosition(data) {
+      return data.keys().hasAll(['title', 'university', 'applyLink']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.university is string && data.university.size() <= 200 &&
+             data.applyLink is string && data.applyLink.size() <= 500;
+    }
+
+    function isValidApplication(data) {
+      return data.keys().hasAll(['jobId', 'status']) &&
+             data.jobId is string &&
+             data.status in ['interested', 'applied', 'interviewing', 'accepted', 'rejected'];
+    }
+
+    // --- Collection Matches ---
+
+    match /profiles/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidProfile(incoming());
+      allow update: if isOwner(userId) && isValidProfile(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'education', 'skills', 'interests', 'lastAnalyzedAt'])
+      );
+    }
+
+    match /positions/{posId} {
+      allow read: if isSignedIn();
+      // Only "system" or specific researchers can create/update positions in a real app, 
+      // but for this demo, we'll allow signed-in users to contribute discovered ones.
+      allow create: if isSignedIn() && isValidPosition(incoming());
+    }
+
+    match /applications/{appId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidApplication(incoming());
+      allow update: if isSignedIn() && existing().userId == request.auth.uid && isValidApplication(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'notes', 'reminderSent', 'updatedAt'])
+      );
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /trends/{trendId} {
+      allow read: if isSignedIn();
+    }
+  }
+}
